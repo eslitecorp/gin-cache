@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/singleflight"
+
+	"github.com/chenyahui/gin-cache/persist"
 )
 
 // Strategy the cache strategy
@@ -117,7 +118,11 @@ func cache(
 			respCache.fillWithCacheWriter(cacheWriter, cfg)
 
 			// only cache 2xx response
-			if !c.IsAborted() && cacheWriter.Status() < 300 && cacheWriter.Status() >= 200 {
+			// if gin context has error, don't cache
+			if !c.IsAborted() &&
+				cacheWriter.Status() < 300 &&
+				cacheWriter.Status() >= 200 &&
+				c.Errors.Last() == nil {
 				if err := cacheStore.Set(cacheKey, respCache, cacheDuration); err != nil {
 					cfg.logger.Errorf("set cache key error: %s, cache key: %s", err, cacheKey)
 				}

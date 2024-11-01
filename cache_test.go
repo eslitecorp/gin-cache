@@ -10,10 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/chenyahui/gin-cache/persist"
 )
 
 func init() {
@@ -317,4 +318,39 @@ func TestCacheByRequestURICustomCacheStrategy(t *testing.T) {
 
 	w3 := mockHttpRequest(cacheURIMiddleware, "/cache?uid=u1", true)
 	assert.NotEqual(t, w1.Body, w3.Body)
+}
+
+func mockHttpRequestWithGinError(middleware gin.HandlerFunc, url string, withRand bool) *httptest.ResponseRecorder {
+	testWriter := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(testWriter)
+	engine.Use(middleware)
+	engine.GET("/cache", func(c *gin.Context) {
+		body := "uid:" + c.Query("uid")
+		if withRand {
+			body += fmt.Sprintf(",rand:%d", rand.Int())
+		}
+		c.Error(fmt.Errorf("gin context error"))
+		c.String(http.StatusOK, body)
+	})
+
+	testRequest := httptest.NewRequest(http.MethodGet, url, nil)
+
+	engine.ServeHTTP(testWriter, testRequest)
+
+	return testWriter
+}
+
+func TestGinErrorShouldNotBeCache(t *testing.T) {
+	memoryStore := persist.NewMemoryStore(1 * time.Minute)
+	cachePathMiddleware := CacheByRequestPath(memoryStore, 3*time.Second)
+
+	w1 := mockHttpRequestWithGinError(cachePathMiddleware, "/cache?uid=u1", true)
+	w2 := mockHttpRequestWithGinError(cachePathMiddleware, "/cache?uid=u2", true)
+	w3 := mockHttpRequestWithGinError(cachePathMiddleware, "/cache?uid=u3", true)
+
+	assert.NotEqual(t, w1.Body, "")
+	assert.NotEqual(t, w1.Body, w2.Body)
+	assert.NotEqual(t, w2.Body, w3.Body)
+	assert.Equal(t, w1.Code, w2.Code)
 }
