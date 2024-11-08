@@ -1,6 +1,7 @@
 package persist
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"time"
@@ -37,7 +38,7 @@ func (c *MemoryStore) Delete(key string) error {
 }
 
 // Get key in memory store, if key doesn't exist, return ErrCacheMiss
-func (c *MemoryStore) Get(key string, value interface{}) error {
+func (c *MemoryStore) Get(_ context.Context, key string, value interface{}) error {
 	val, err := c.Cache.Get(key)
 	if errors.Is(err, ttlcache.ErrNotFound) {
 		return ErrCacheMiss

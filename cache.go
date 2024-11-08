@@ -2,6 +2,7 @@ package cache
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"errors"
 	"net/http"
@@ -34,6 +35,7 @@ type GetCacheStrategyByRequest func(c *gin.Context) (bool, Strategy)
 
 // Cache user must pass getCacheKey to describe the way to generate cache key
 func Cache(
+	ctx context.Context,
 	defaultCacheStore persist.CacheStore,
 	defaultExpire time.Duration,
 	opts ...Option,
@@ -80,7 +82,7 @@ func cache(
 		// read cache first
 		{
 			respCache := &ResponseCache{}
-			err := cacheStore.Get(cacheKey, &respCache)
+			err := cacheStore.Get(c, cacheKey, &respCache)
 			if err == nil {
 				replyWithCache(c, cfg, respCache)
 				cfg.hitCacheCallback(c)
@@ -203,14 +205,14 @@ func getRequestUriIgnoreQueryOrder(requestURI string) (string, error) {
 }
 
 // CacheByRequestPath a shortcut function for caching response by url path, means will discard the query params
-func CacheByRequestPath(defaultCacheStore persist.CacheStore, defaultExpire time.Duration, opts ...Option) gin.HandlerFunc {
+func CacheByRequestPath(ctx context.Context, defaultCacheStore persist.CacheStore, defaultExpire time.Duration, opts ...Option) gin.HandlerFunc {
 	opts = append(opts, WithCacheStrategyByRequest(func(c *gin.Context) (bool, Strategy) {
 		return true, Strategy{
 			CacheKey: c.Request.URL.Path,
 		}
 	}))
 
-	return Cache(defaultCacheStore, defaultExpire, opts...)
+	return Cache(ctx, defaultCacheStore, defaultExpire, opts...)
 }
 
 func init() {
