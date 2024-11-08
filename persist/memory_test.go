@@ -12,12 +12,12 @@ import (
 
 func TestMemoryStore(t *testing.T) {
 	memoryStore := NewMemoryStore(1 * time.Minute)
+	ctx := context.Background()
 
 	expectVal := "123"
-	require.Nil(t, memoryStore.Set("test", expectVal, 1*time.Second))
+	require.Nil(t, memoryStore.Set(ctx, "test", expectVal, 1*time.Second))
 
 	value := ""
-	ctx := context.Background()
 	assert.Nil(t, memoryStore.Get(ctx, "test", &value))
 	assert.Equal(t, expectVal, value)
 

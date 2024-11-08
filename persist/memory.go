@@ -28,12 +28,12 @@ func NewMemoryStore(defaultExpiration time.Duration) *MemoryStore {
 }
 
 // Set put key value pair to memory store, and expire after expireDuration
-func (c *MemoryStore) Set(key string, value interface{}, expireDuration time.Duration) error {
+func (c *MemoryStore) Set(_ context.Context, key string, value interface{}, expireDuration time.Duration) error {
 	return c.Cache.SetWithTTL(key, value, expireDuration)
 }
 
 // Delete remove key in memory store, do nothing if key doesn't exist
-func (c *MemoryStore) Delete(key string) error {
+func (c *MemoryStore) Delete(_ context.Context, key string) error {
 	return c.Cache.Remove(key)
 }
 

@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -230,10 +231,11 @@ func TestPrefixKey(t *testing.T) {
 	)
 
 	requestPath := "/cache"
+	ctx := context.Background()
 
 	w1 := mockHttpRequest(cachePathMiddleware, requestPath, true)
 
-	err := memoryStore.Delete(prefixKey + requestPath)
+	err := memoryStore.Delete(ctx, prefixKey+requestPath)
 	require.NoError(t, err)
 
 	w2 := mockHttpRequest(cachePathMiddleware, requestPath, true)
@@ -291,7 +293,8 @@ func TestCustomCacheStrategy(t *testing.T) {
 	_ = mockHttpRequest(cacheMiddleware, "/cache?uid=1", false)
 
 	var val interface{}
-	err := memoryStore.Get("custom_cache_key_1", &val)
+	ctx := context.Background()
+	err := memoryStore.Get(ctx, "custom_cache_key_1", &val)
 	assert.Nil(t, err)
 }
 
@@ -307,7 +310,8 @@ func TestCacheByRequestURICustomCacheStrategy(t *testing.T) {
 
 	w1 := mockHttpRequest(cacheURIMiddleware, "/cache?uid=u1", true)
 	var val interface{}
-	err := memoryStore.Get(customKey, &val)
+	ctx1 := context.Background()
+	err := memoryStore.Get(ctx1, customKey, &val)
 	assert.Nil(t, err)
 	time.Sleep(1 * time.Second)
 
