@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // RedisStore store http response in redis
@@ -38,8 +38,7 @@ func (store *RedisStore) Delete(key string) error {
 }
 
 // Get retrieves an item from redis, if key doesn't exist, return ErrCacheMiss
-func (store *RedisStore) Get(key string, value interface{}) error {
-	ctx := context.TODO()
+func (store *RedisStore) Get(ctx context.Context, key string, value interface{}) error {
 	payload, err := store.RedisClient.Get(ctx, key).Bytes()
 
 	if errors.Is(err, redis.Nil) {
