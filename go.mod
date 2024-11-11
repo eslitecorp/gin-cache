@@ -1,8 +1,6 @@
 module github.com/chenyahui/gin-cache
 
-go 1.21.0
-
-toolchain go1.23.2
+go 1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
