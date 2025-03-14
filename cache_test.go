@@ -192,11 +192,11 @@ func TestWriteHeader(t *testing.T) {
 }
 
 func TestGetRequestUriIgnoreQueryOrder(t *testing.T) {
-	val, err := getRequestUriIgnoreQueryOrder("/test?c=3&b=2&a=1")
+	val, err := GetRequestUriIgnoreQueryOrder("/test?c=3&b=2&a=1")
 	require.NoError(t, err)
 	assert.Equal(t, "/test?a=1&b=2&c=3", val)
 
-	val, err = getRequestUriIgnoreQueryOrder("/test?d=4&e=5")
+	val, err = GetRequestUriIgnoreQueryOrder("/test?d=4&e=5")
 	require.NoError(t, err)
 	assert.Equal(t, "/test?d=4&e=5", val)
 }
