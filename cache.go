@@ -149,9 +149,9 @@ func CacheByRequestURI(defaultCacheStore persist.CacheStore, defaultExpire time.
 	var cacheStrategy GetCacheStrategyByRequest
 	if cfg.ignoreQueryOrder {
 		cacheStrategy = func(c *gin.Context) (bool, Strategy) {
-			newUri, err := getRequestUriIgnoreQueryOrder(c.Request.RequestURI)
+			newUri, err := GetRequestUriIgnoreQueryOrder(c.Request.RequestURI)
 			if err != nil {
-				cfg.logger.Errorf("getRequestUriIgnoreQueryOrder error: %s", err)
+				cfg.logger.Errorf("GetRequestUriIgnoreQueryOrder error: %s", err)
 				newUri = c.Request.RequestURI
 			}
 
@@ -173,7 +173,7 @@ func CacheByRequestURI(defaultCacheStore persist.CacheStore, defaultExpire time.
 	return cache(defaultCacheStore, defaultExpire, cfg)
 }
 
-func getRequestUriIgnoreQueryOrder(requestURI string) (string, error) {
+func GetRequestUriIgnoreQueryOrder(requestURI string) (string, error) {
 	parsedUrl, err := url.ParseRequestURI(requestURI)
 	if err != nil {
 		return "", err
